@@ -125,31 +125,38 @@ rational& operator+=( const rational& rational_b){
    return *this;
  }
 };
-class poly{
-  private: 
-    
-    
 
-  public:  
+
+struct FiveTuple{
+  private:
+
+
+
+
+
+  public:
   rational coeff[10]; 
-  long int deg ;  
-   poly(){
-    deg = 0;
-    for (long int i = 0; i < 10 ; i++)
-    { //rational b = {0,0};
+  long int deg ;
+   // using sstdvectorrational::stdvectorrational;
+   // typedef typename FiveTuple::value_type Entry;
+    template <typename T>
+        FiveTuple(T in)  {
+           deg = 0;
+           for (long int i = 0; i < 10 ; i++){
       coeff[i].numerator = 0;
       coeff[i].denominator = 1;
     }
-    
-   }
+        }
 
-  void set(rational a, long int d){
+
+
+    void set(rational a, long int d){
     coeff[d].numerator = a.numerator;
     coeff[d].denominator = a.denominator;
     deg = degree();
-  }
 
-  void set_to_zeros(){
+  }
+    void set_to_zeros(){
     for (long int i = 0; i <= deg; i++)
     {
     coeff[i].numerator = 0;
@@ -170,30 +177,9 @@ class poly{
     deg = d;
     return d;
   }
- // poly poly_modular(poly poly_a , poly poly_b);
-  poly operator= (const poly &poly_b){
-      for (long int  i = 0; i <= max(poly_b.deg,this->deg); i++)
-      {
-        this->coeff[i].numerator = poly_b.coeff[i].numerator;
-        this->coeff[i].denominator = poly_b.coeff[i].denominator;
-      }
-      deg = this->degree();
-      return *this;
-  }
   rational operator[](long int idx){
     return coeff[idx];
   }
-};
-typedef std::vector<rational> stdvectorrational;
-
-struct FiveTuple: poly{
-   // using sstdvectorrational::stdvectorrational;
-   // typedef typename FiveTuple::value_type Entry;
-    template <typename T>
-        FiveTuple(T in) : poly() {
-            
-        }
-
     void zero(){
      for (long int i = 0; i <= deg; i++)
      {
