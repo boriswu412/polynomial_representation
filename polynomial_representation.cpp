@@ -21,22 +21,13 @@ int gcd(int a, int b)
 class rational
 {
 private:
-  void simplify(rational &r)
-  {
-    int g;
-    g = gcd(r.denominator, r.numerator);
-    r.numerator = r.numerator / g;
-    r.denominator = r.denominator / g;
-    if (r.denominator <= 0)
-    {
-      r.numerator = r.numerator * (-1);
-      r.denominator = r.denominator * (-1);
-    }
-  }
+  
 
 public:
+
   int numerator;
   int denominator;
+  
   rational()
   {
     numerator = 0;
@@ -59,6 +50,7 @@ public:
       numerator = (-1) * n;
       denominator = (-1) * d;
     }
+    
   }
 
   void show()
@@ -98,6 +90,30 @@ public:
 
     return tmp;
   }
+  void simplify(rational &r)
+  {
+    int g;
+    g = gcd(r.denominator, r.numerator);
+    r.numerator = r.numerator / g;
+    r.denominator = r.denominator / g;
+    if (r.denominator <= 0)
+    {
+      r.numerator = r.numerator * (-1);
+      r.denominator = r.denominator * (-1);
+    }
+  }
+  void simplify(){
+    int g; 
+    g = gcd(this->denominator,this->numerator);
+    this->numerator = this->numerator/g;
+    this->denominator = this->denominator/g;
+    if (this->denominator <= 0)
+    {
+      this->numerator = this->numerator * (-1);
+      this->denominator = this->denominator * (-1);
+    }
+    
+  }
 
   rational operator/(const rational &rational_b)
   {
@@ -129,12 +145,11 @@ public:
 struct FiveTuple
 {
 private:
-const static long int  N = 4;
+const static long int  N = 4;  //the cyclomotic polynomial has highest degree of N
 public:
   rational coeff[2*N];
   long int deg;
-  // using sstdvectorrational::stdvectorrational;
-  // typedef typename FiveTuple::value_type Entry;
+ 
   template <typename T>
   FiveTuple(T in)
   {
@@ -157,9 +172,10 @@ public:
   }
   
   void set(rational a, long int d)
-  {
+  { 
     coeff[d].numerator = a.numerator;
     coeff[d].denominator = a.denominator;
+    coeff[d].simplify();
     deg = degree();
   }
   void set_to_zeros()
@@ -237,6 +253,25 @@ public:
    
    return p;
   }
+
+  rational to_rational(){
+    if (this->deg ==0)
+    { 
+      return coeff[0];
+      
+    }
+    else{cout << "this is not a rational " << endl;}
+    
+  }
+
+  int to_int(){
+    if (this->deg ==0 && this->coeff[0].denominator == 1){
+      return this->coeff[0].numerator;
+    }
+    else{cout << "this is not a int" << endl;}
+  }
+
+
 
   void show()
   {
@@ -340,6 +375,15 @@ public:
 
     return tmp;
   }
+  FiveTuple operator/ (rational &r){
+    for (long int  i = 0 ; i <= this->deg ; i++)
+    {
+      this->coeff[i] = this->coeff[i] / r;
+      coeff[i].simplify();
+    }
+    this->degree();
+    return *this;
+  }
 };
 
 int main()
@@ -358,8 +402,10 @@ int main()
   rational two(2, 1);
   rational minus_one(-1, 1);
   rational minus_two(-2, 1);
+  rational k;
+  int n;
 
-  q.set(one, 2);
+  q.set(two, 0);
 
   p.set(one, 3);
   p.set(one, 1);
@@ -384,6 +430,9 @@ int main()
   f = w * w;
   f.show();
   w.show();
-  
-
+  w/two;
+  w.show();
+  n = q.to_int();
+  cout<< " q is "<< n << endl ;
+  p.to_int();
 }
