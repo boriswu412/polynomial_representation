@@ -2,6 +2,7 @@
 #include <vector>
 #include <boost/rational.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
+#include <cmath>
 using namespace std;
 
 int gcd(int a, int b)
@@ -140,9 +141,26 @@ public:
 
     return *this;
   }
+  bool operator!=(const rational &rational_b){
+    if (this->numerator == rational_b.numerator && this->denominator == rational_b.denominator  )
+    {
+      return 0;
+    }
+    else return 1;
+  }
+
+  bool operator<(const  rational   &rational_b){
+     rational tmp_1;
+     tmp_1 = *this - rational_b ; 
+     if(tmp_1.numerator < 0) return 1; 
+     else return 0 ;
+      
+     
+  }
+  
 };
 
-struct FiveTuple
+struct N_tuple
 {
 private:
 const static long int  N = 4;  //the cyclomotic polynomial has highest degree of N
@@ -151,7 +169,7 @@ public:
   long int deg;
  
   template <typename T>
-  FiveTuple(T in)
+  N_tuple(T in)
   {
     deg = 0;
     for (long int i = 0; i < 2*N; i++)
@@ -161,7 +179,7 @@ public:
     }
   }
   template <typename T>
-  FiveTuple()
+  N_tuple()
   {
     deg = 0;
     for (long int i = 0; i < 2*N; i++)
@@ -172,11 +190,13 @@ public:
   }
   
   void set(rational a, long int d)
-  { 
+  { if(d > N) {cout << "invalid power";}
+    else{
     coeff[d].numerator = a.numerator;
     coeff[d].denominator = a.denominator;
     coeff[d].simplify();
     deg = degree();
+    }
   }
   void set_to_zeros()
   {
@@ -221,39 +241,80 @@ public:
     set(one, 0);
   }
 
-  static FiveTuple Zero()
+  static N_tuple Zero()
   {
-    return FiveTuple(2);
+    return N_tuple(2);
   }
-  static FiveTuple One()
+  static N_tuple One()
   {
     rational one(1, 1);
-    FiveTuple p = FiveTuple(0);
+    N_tuple p = N_tuple(0);
     p.set(one, 0);
     return p;
   }
-  static FiveTuple sqrt2()
+  static N_tuple sqrt2()    //TODO :for N_tuple now only when N=4
   {
     rational half(1, 2);
-    FiveTuple p = FiveTuple(0);
+    rational minus_one(-1,1);
+
+    N_tuple p = N_tuple(0);
     p.set(half, 1);
-    p.set(half, 3);
+    p.set(minus_one * half, 3);
 
     return p;
   }
-  static FiveTuple Rand()
+  static N_tuple Rand()
   {
    
-   FiveTuple p = FiveTuple(0);
+   N_tuple p = N_tuple(0);
    for (size_t i = 0; i < N; i++)
    {rational tmp((rand() - 2147483646/2)%10000,(rand() +1)%100000);
      p.set(tmp,i);
     
    }
+
    
    return p;
   }
+  static N_tuple Angle(rational &r){
+      
+    N_tuple p = N_tuple(0);
+    if (N % r.denominator != 0 ) {
+      cout << "invalid angle";
+      return p;
+      }
+    else
+    {
+      rational one(1,1);
+      p.set(one, N*r.numerator/r.denominator);
+      return p;
+    }
+  
+  }
+  N_tuple fraction_simplification(){
+    return *this;
+  }
+  double abs2(){
+    double rl, im;
+     rl = 0;
+     im = 0; 
+    for (long int  i = 0; i <= this->deg; i++)
+    { double tmp = this->coeff[i].numerator / this->coeff[i].denominator;
+      cout << "n and d are " <<this->coeff[i].numerator <<" " <<  this->coeff[i].denominator <<endl;
+      cout << "tmp is " << tmp << endl; 
+      rl += tmp * cos(i*M_PI/N);
+      im += tmp * sin(i*M_PI/N);
 
+    }
+    cout << "rl is" <<rl <<endl;
+    cout << "im is " << im << endl;
+    return (rl*rl + im *im);
+     
+  }
+  N_tuple divide_by_the_square_root_of_two(int times=1){
+
+  }
+ 
   rational to_rational(){
     if (this->deg ==0)
     { 
@@ -261,7 +322,7 @@ public:
       
     }
     else{cout << "this is not a rational " << endl;}
-    
+    return coeff[deg+1];
   }
 
   int to_int(){
@@ -269,6 +330,7 @@ public:
       return this->coeff[0].numerator;
     }
     else{cout << "this is not a int" << endl;}
+    return 0;
   }
 
 
@@ -286,7 +348,21 @@ public:
     }
     cout << endl;
   }
-  FiveTuple operator=(const FiveTuple &poly_b)
+  N_tuple counterclockwise(rational &r){
+      N_tuple tmp = N_tuple(0).Angle(r);
+      *this = *this * tmp;
+      return *this;
+  }
+
+  N_tuple clockwise(rational &r){
+    rational minus_one(-1,1);
+    rational one(1,1);
+    *this = *this *minus_one;
+    rational tmp = one - r;
+    this->counterclockwise(tmp );
+    return *this;
+  }
+  N_tuple operator=(const N_tuple &poly_b)
   {
     this->set_to_zeros();
     for (long int i = 0; i <= max(poly_b.deg, this->deg); i++)
@@ -298,9 +374,11 @@ public:
     return *this;
   }
 
-  FiveTuple operator+(const FiveTuple &poly_b)
+  
+
+  N_tuple operator+(const N_tuple &poly_b)
   {
-    FiveTuple tmp(0); // Cn we use emoty argument in constructor?
+    N_tuple tmp(0); // Cn we use emoty argument in constructor?
     for (int i = 0; i <= max(poly_b.deg, this->deg); i++)
     {
       tmp.coeff[i] = this->coeff[i] + poly_b.coeff[i];
@@ -309,9 +387,9 @@ public:
     return tmp;
   }
 
-  FiveTuple operator-(const FiveTuple &poly_b)
+  N_tuple operator-(const N_tuple &poly_b)
   {
-    FiveTuple tmp(0); // Cn we use emoty argument in constructor?
+    N_tuple tmp(0); // Cn we use emoty argument in constructor?
     for (int i = 0; i <= max(poly_b.deg, this->deg); i++)
     {
       this->coeff[i] = this->coeff[i] - poly_b.coeff[i];
@@ -320,9 +398,9 @@ public:
     tmp.degree();
     return tmp;
   }
-  FiveTuple operator*(const rational &r)
+  N_tuple operator*(const rational &r)
   {
-    FiveTuple tmp(0);
+    N_tuple tmp(0);
     for (int i = 0; i <= this->deg; i++)
     {
       tmp.coeff[i] = this->coeff[i] * r;
@@ -330,10 +408,10 @@ public:
     tmp.degree();
     return tmp;
   }
-  FiveTuple operator%(FiveTuple &poly_b)
+  N_tuple operator%(N_tuple &poly_b)
   {
 
-    FiveTuple tmp(0);
+    N_tuple tmp(0);
     tmp = *this;
     while (tmp.deg >= poly_b.deg)
     {
@@ -351,9 +429,9 @@ public:
     }
     return tmp;
   }
-  FiveTuple operator*(FiveTuple &poly_b)
+  N_tuple operator*(N_tuple &poly_b)
   {
-    FiveTuple tmp(0);
+    N_tuple tmp(0);
     for (long int i = 0; i <= this->deg + poly_b.deg; i++)
     {
       for (long int j = 0; j <= i; j++)
@@ -364,7 +442,7 @@ public:
     tmp.degree();
     // cout<<tmp.deg <<endl;
     // tmp.show();
-    FiveTuple cyclo_poly(0);
+    N_tuple cyclo_poly(0);
     rational one(1, 1);
     cyclo_poly.set(one, 4);
     cyclo_poly.set(one, 0);
@@ -375,7 +453,7 @@ public:
 
     return tmp;
   }
-  FiveTuple operator/ (rational &r){
+  N_tuple operator/ (rational &r){
     for (long int  i = 0 ; i <= this->deg ; i++)
     {
       this->coeff[i] = this->coeff[i] / r;
@@ -384,55 +462,73 @@ public:
     this->degree();
     return *this;
   }
+  bool operator==(const N_tuple &poly_b){
+    if (this->deg == poly_b.deg)
+    { for (long int  i = 0; i <= this->deg; i++)
+    { 
+      if (this->coeff[i] != poly_b.coeff[i])
+    { 
+      return 0; 
+    }
+   
+    }
+         
+    } 
+    return 1;
+  }
+  bool operator<(const N_tuple poly_b){
+    if (this->deg < poly_b.deg) return 1;
+    else if (this->deg >poly_b.deg) return 0;
+    else{
+      for (long int  i = this->deg; i >= 0; i--)
+      { if (this->coeff[i] != poly_b.coeff[i])
+      {  if(this->coeff[i] <poly_b.coeff[i]) return 1;
+        
+      }
+      
+        
+      }
+      return 0;
+    }
+    
+    
+    
+  }
+  bool isZero(){
+     if (this->deg == 0 && this->coeff[0].numerator == 0)
+     {
+      return 1;
+     }
+     else return 0;
+  }
 };
 
 int main()
 { srand( time(NULL) );
-  FiveTuple q(0);
-  FiveTuple p(0);
-  FiveTuple f(0);
-  FiveTuple r(0);
-  FiveTuple w = FiveTuple(0).Rand();
+  N_tuple q(0);
+  N_tuple p(0);
+  N_tuple f(0);
+  
+  N_tuple w = N_tuple(0).Rand();
 
 
   rational one(1, 1);
   rational i(1, 2);
-  rational j(2, 3);
+  rational j(3, 4);
+  
   rational zero(0, 1);
   rational two(2, 1);
   rational minus_one(-1, 1);
   rational minus_two(-2, 1);
-  rational k;
-  int n;
-
-  q.set(two, 0);
-
-  p.set(one, 3);
-  p.set(one, 1);
-  p.set(minus_two, 0);
-  // cout <<"n is "<< minus_two.numerator << endl;
-  // p[0].show();
-
-  // cout << p.deg<< endl;
   
-  r = p * p;
-
-  p.degree();
-  // cout << p.deg<< endl;
-  // cout << r.deg <<endl;
-  // p[0].show();
-  //  cout << "p is ";
-  //   p.show();
-  cout << "r is ";
-  r.show();
+  rational k(2,-128);
+  int n;
+  N_tuple r = N_tuple(0).Angle(i);
+  
   w.show();
-  p.show();
-  f = w * w;
-  f.show();
-  w.show();
-  w/two;
-  w.show();
-  n = q.to_int();
-  cout<< " q is "<< n << endl ;
-  p.to_int();
+  cout.precision(4);
+  cout<< w.abs2() << endl;
+  double y = 8/9;
+  cout.precision(4);
+  cout << "y is "<< y<< endl;
 }
