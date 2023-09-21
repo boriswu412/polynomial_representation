@@ -254,12 +254,14 @@ public:
   }
   static N_tuple sqrt2()    //TODO :for N_tuple now only when N=4
   {
-    rational half(1, 2);
+    rational one(1, 1);
     rational minus_one(-1,1);
 
     N_tuple p = N_tuple(0);
-    p.set(half, 1);
-    p.set(minus_one * half, 3);
+    p.set(one, 1);
+    p.set(minus_one , 3);
+
+    
 
     return p;
   }
@@ -299,11 +301,11 @@ public:
      rl = 0;
      im = 0; 
     for (long int  i = 0; i <= this->deg; i++)
-    { double tmp = this->coeff[i].numerator / this->coeff[i].denominator;
+    { double tmp = (double)this->coeff[i].numerator / this->coeff[i].denominator;
       cout << "n and d are " <<this->coeff[i].numerator <<" " <<  this->coeff[i].denominator <<endl;
       cout << "tmp is " << tmp << endl; 
-      rl += tmp * cos(i*M_PI/N);
-      im += tmp * sin(i*M_PI/N);
+      rl += (double)tmp * cos(i*M_PI/N);
+      im +=  (double)tmp * sin(i*M_PI/N);
 
     }
     cout << "rl is" <<rl <<endl;
@@ -312,7 +314,10 @@ public:
      
   }
   N_tuple divide_by_the_square_root_of_two(int times=1){
+    N_tuple sqrt = N_tuple(0).sqrt2();
 
+    *this = *this  * sqrt;
+    return *this;
   }
  
   rational to_rational(){
@@ -509,7 +514,7 @@ int main()
   N_tuple p(0);
   N_tuple f(0);
   
-  N_tuple w = N_tuple(0).Rand();
+  N_tuple w = N_tuple(0).sqrt2();
 
 
   rational one(1, 1);
@@ -523,12 +528,12 @@ int main()
   
   rational k(2,-128);
   int n;
-  N_tuple r = N_tuple(0).Angle(i);
+  f.set(minus_two, 1);
   
   w.show();
-  cout.precision(4);
+  
   cout<< w.abs2() << endl;
-  double y = 8/9;
-  cout.precision(4);
+  double y = (double)100/88;
+  cout.precision(6);
   cout << "y is "<< y<< endl;
 }
