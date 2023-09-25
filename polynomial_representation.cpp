@@ -296,6 +296,37 @@ public:
   N_tuple fraction_simplification(){
     return *this;
   }
+  std::string realToSMT() const {
+    std::string result;
+    double rl;
+     rl = 0;
+     
+    for (long int  i = 0; i <= this->deg; i++)
+    { double tmp = (double)this->coeff[i].numerator / this->coeff[i].denominator;
+       
+      rl += (double)tmp * cos(i*M_PI/N);
+      
+    }
+    result = to_string(rl);
+    return result;
+
+    }
+    std::string imagToSMT() const {
+    std::string result;
+    double im;
+     
+     im = 0; 
+    for (long int  i = 0; i <= this->deg; i++)
+    { double tmp = (double)this->coeff[i].numerator / this->coeff[i].denominator;
+      
+      im +=  (double)tmp * sin(i*M_PI/N);
+
+    }
+    
+    result = to_string(im);
+    return result;
+    }
+  
   double abs2(){
     double rl, im;
      rl = 0;
@@ -313,6 +344,8 @@ public:
     return (rl*rl + im *im);
      
   }
+
+
   N_tuple divide_by_the_square_root_of_two(int times=1){
     N_tuple sqrt = N_tuple(0).sqrt2();
 
@@ -353,6 +386,17 @@ public:
     }
     cout << endl;
   }
+  friend std::ostream& operator<<(std::ostream& os, const N_tuple& obj) {
+      for (long int  i = obj.deg; i >= 0; i --)
+      {
+       os <<  obj.coeff[i].numerator <<  "/" << obj.coeff[i].denominator <<"x^" << i;
+       if( i != 0 ) os << "+";
+      }
+      os << endl;
+      
+        
+        return os;
+    }
   N_tuple counterclockwise(rational &r){
       N_tuple tmp = N_tuple(0).Angle(r);
       *this = *this * tmp;
@@ -536,4 +580,6 @@ int main()
   double y = (double)100/88;
   cout.precision(6);
   cout << "y is "<< y<< endl;
+  cout << w;
+  w.show(); 
 }
